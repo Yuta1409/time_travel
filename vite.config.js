@@ -8,9 +8,16 @@ const __dirname = path.dirname(__filename)
 
 export default defineConfig({
   plugins: [vue()],
+  root: '.', // index.html est à la racine
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src') // ton dossier Vue
+    }
+  },
+  build: {
+    outDir: 'dist', // Build à la racine
+    rollupOptions: {
+      input: path.resolve(__dirname, 'index.html') // Assure que vite build index.html
     }
   },
   server: {
