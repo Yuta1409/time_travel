@@ -196,7 +196,18 @@ app.post('/api/reservation', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Catch-all — serve SPA
+// Page routes (multi-page)
+// ---------------------------------------------------------------------------
+app.get('/destinations', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'destinations.html'));
+});
+
+app.get('/reservation', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'reservation.html'));
+});
+
+// ---------------------------------------------------------------------------
+// Catch-all — serve home page
 // ---------------------------------------------------------------------------
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

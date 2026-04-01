@@ -18,8 +18,9 @@
 
   let isOpen = false;
   let isTyping = false;
+  let chatHistory = [];
 
-  // ── Réponses du chatbot ──
+  // ── Réponses mock (fallback) ──
   const RESPONSES = [
     {
       keywords: ['bonjour', 'salut', 'hello', 'bonsoir', 'hey', 'hi', 'coucou'],
@@ -69,8 +70,8 @@
 
   const DEFAULT_RESPONSE = "Je suis là pour vous guider dans vos voyages temporels ! 🕰️\n\nPosez-moi des questions sur :\n• Paris 1889 (Belle Époque)\n• Le Crétacé (Dinosaures)\n• Florence 1504 (Renaissance)\n• Les prix et durées\n• La sécurité des voyages\n\nComment puis-je vous aider ?";
 
-  // ── Find response ──
-  function findResponse(message) {
+  // ── Mock response lookup ──
+  function findMockResponse(message) {
     const lower = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     for (const item of RESPONSES) {
       for (const keyword of item.keywords) {
@@ -81,6 +82,26 @@
       }
     }
     return DEFAULT_RESPONSE;
+  }
+
+  // ── API call with mock fallback ──
+  async function getResponse(text) {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-8) })
+      });
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      if (data.fallback) throw new Error('fallback');
+      chatHistory.push({ role: 'user', content: text });
+      chatHistory.push({ role: 'assistant', content: data.reply });
+      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+      return data.reply;
+    } catch {
+      return findMockResponse(text);
+    }
   }
 
   // ── Add message ──
@@ -123,7 +144,7 @@
   }
 
   // ── Send message ──
-  function sendMessage() {
+  async function sendMessage() {
     const text = input.value.trim();
     if (!text || isTyping) return;
 
@@ -132,18 +153,15 @@
     sendBtn.disabled = true;
     isTyping = true;
 
-    // Simulate thinking delay
-    const delay = 800 + Math.random() * 600;
     showTyping();
 
-    setTimeout(() => {
-      hideTyping();
-      const response = findResponse(text);
-      addMessage(response, 'bot');
-      isTyping = false;
-      sendBtn.disabled = false;
-      input.focus();
-    }, delay);
+    const response = await getResponse(text);
+
+    hideTyping();
+    addMessage(response, 'bot');
+    isTyping = false;
+    sendBtn.disabled = false;
+    input.focus();
   }
 
   // ── Toggle window ──
@@ -186,7 +204,7 @@
 
   initWelcome();
 
-  // ── Expose pour navbar ──
+  // ── Expose pour navbar / CTA ──
   window.openChatbot = () => toggleChat(true);
 
 })();
