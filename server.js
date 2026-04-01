@@ -16,10 +16,17 @@ try {
 } catch {}
 
 const app = express()
-const PORT = process.env.PORT || 3001
 
-app.use(cors({ origin: 'http://localhost:5173' }))
-app.use(express.json())
+// Servir fichiers statiques
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Toutes les routes renvoient index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 const SYSTEM_PROMPT = `Tu es Chronos, l'assistant virtuel de TimeTravel Agency, une agence de voyage temporel de luxe.
 Ton rôle : conseiller les clients sur les meilleures destinations temporelles.
