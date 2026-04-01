@@ -2,7 +2,6 @@
 // TIMETRAVEL AGENCY — Composable Chatbot
 // ============================================
 import { ref, nextTick } from 'vue'
-import { CHATBOT_RESPONSES, DEFAULT_RESPONSE, WELCOME_MESSAGE } from '../data/chatbot.js'
 
 export function useChatbot() {
   const isOpen = ref(false)
